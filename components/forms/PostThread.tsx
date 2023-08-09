@@ -1,10 +1,12 @@
 "use client";
 
 import * as z from "zod";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useOrganization } from "@clerk/nextjs";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { usePathname, useRouter } from "next/navigation";
+import { ClipLoader } from "react-spinners";
 
 import {
   Form,
@@ -27,6 +29,7 @@ interface Props {
 function PostThread({ userId }: Props) {
   const router = useRouter();
   const pathname = usePathname();
+  const [isLoadingButton, setIsLoadingButton] = useState(false);
 
   const { organization } = useOrganization();
 
@@ -39,6 +42,7 @@ function PostThread({ userId }: Props) {
   });
 
   const onSubmit = async (values: z.infer<typeof ThreadValidation>) => {
+    setIsLoadingButton(true);
     await createThread({
       text: values.thread,
       author: userId,
@@ -47,6 +51,7 @@ function PostThread({ userId }: Props) {
     });
 
     router.push("/");
+    setIsLoadingButton(false);
   };
 
   return (
@@ -72,6 +77,9 @@ function PostThread({ userId }: Props) {
         />
 
         <Button type="submit" className="bg-primary-500">
+          {isLoadingButton ? (
+            <ClipLoader color="#fff" size={20} className="mr-2" />
+          ) : null}
           Post Thread
         </Button>
       </form>
